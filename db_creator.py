@@ -29,10 +29,9 @@ def db_connect():
     return conn
 
 
-
-def create_db(conn):
+# Create all the table of the database
+def create_db(cursor):
     
-    cursor = conn.cursor()
     cursor.execute("""SET NAMES utf8;""")
     cursor.execute("""SET CHARACTER SET utf8;""")
     cursor.execute("""SET character_set_connection=utf8;""")
@@ -41,7 +40,7 @@ def create_db(conn):
     cursor.execute(""" DROP TABLE IF EXISTS saved_substitute; """) 
     cursor.execute(""" DROP TABLE IF EXISTS product; """)
     cursor.execute(""" DROP TABLE IF EXISTS category; """)
-    #cursor.execute(""" DROP TABLE IF EXISTS nutriscore; """)
+    cursor.execute(""" DROP TABLE IF EXISTS nutriscore; """)
     cursor.execute(""" DROP TABLE IF EXISTS brand; """)
     cursor.execute(""" DROP TABLE IF EXISTS store; """)
     
@@ -58,14 +57,14 @@ def create_db(conn):
                         DEFAULT CHARSET = utf8; """)
 
     # Create the table nutriscore
-##    cursor.execute(""" CREATE TABLE nutriscore (
-##                        id_nutriscore TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
-##                        value VARCHAR(1) NOT NULL,
-##                        PRIMARY KEY(id_nutriscore)
-##                        )
-##                        ENGINE = InnoDB
-##                        DEFAULT CHARSET = utf8; """)
-##    
+    cursor.execute(""" CREATE TABLE nutriscore (
+                        id_nutriscore TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                        value VARCHAR(1) NOT NULL,
+                        PRIMARY KEY(id_nutriscore)
+                        )
+                        ENGINE = InnoDB
+                        DEFAULT CHARSET = utf8; """)
+    
 
     # Create the table brand
     cursor.execute(""" CREATE TABLE brand (
@@ -92,6 +91,7 @@ def create_db(conn):
                         id_category TINYINT UNSIGNED NOT NULL,
                         id_brand MEDIUMINT UNSIGNED NOT NULL,
                         id_store MEDIUMINT UNSIGNED NOT NULL,
+                        id_nutriscore TINYINT UNSIGNED NOT NULL,
                         url VARCHAR(100) NOT NULL,
                         PRIMARY KEY(id_product),
                         CONSTRAINT fk_category
@@ -100,6 +100,9 @@ def create_db(conn):
                         CONSTRAINT fk_brand
                             FOREIGN KEY(id_brand)
                             REFERENCES brand(id_brand),
+                        CONSTRAINT fk_nutriscore
+                            FOREIGN KEY(id_nutriscore)
+                            REFERENCES nutriscore(id_nutriscore),
                         CONSTRAINT fk_store
                             FOREIGN KEY(id_store)
                             REFERENCES store(id_store)
@@ -122,24 +125,44 @@ def create_db(conn):
                         )
                         ENGINE = InnoDB
                         DEFAULT CHARSET = utf8; """)
-                        
-def insert_nutriscore(conn, category):
+
+# Insert data in the table nutriscore                        
+def insert_nutriscore(cursor, nutri):
     
-    cursor = conn.cursor()
+    cursor.execute("""
+                    INSERT INTO nutriscore(value)
+                    VALUES("{}");""" .format(nutri))
+
+# Insert data in the table brand
+def insert_brand(curspr, brand):
+
+    cursor.execute("""
+                    INSERT INTO brand(name)
+                    VALUES("{}");""" .format(brand))
+
+# Insert data in the table store
+def insert_store(cursor, store):
+
+    cursor.execute("""
+                    INSERT INTO store(name)
+                    VALUES("{}");""" .format(store))
+
+# Insert data in the table category
+def insert_category(cursor, categ):
+
     cursor.execute("""
                     INSERT INTO category(name)
-                    VALUES("{}");""" .format(category))
-
-    
+                    VALUES("{}");""" .format(categ))
                         
 
     
 
 def main():
         conn = db_connect()
-        create_db(conn)
+        cursor = conn.cursor()
+        create_db(cursor)
         for x in nutriscore:
-            insert_nutriscore(conn, x)
+            insert_nutriscore(cursor, x)
         conn.commit()
         conn.close()
     
