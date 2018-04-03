@@ -24,13 +24,16 @@ def db_connect():
     
     conn = pymysql.connect(host="localhost",\
                                 user="root",\
-                                password="",\
-                                database="purbeurre")
+                                password="")
     return conn
 
 
 # Create all the table of the database
 def create_db(cursor):
+
+    cursor.execute(""" DROP DATABASE IF EXISTS purbeurre; """)
+    cursor.execute(""" CREATE DATABASE purbeurre; """)
+    cursor.execute(""" USE purbeurre; """)
     
     cursor.execute("""SET NAMES utf8;""")
     cursor.execute("""SET CHARACTER SET utf8;""")
@@ -134,7 +137,7 @@ def insert_nutriscore(cursor, nutri):
                     VALUES("{}");""" .format(nutri))
 
 # Insert data in the table brand
-def insert_brand(curspr, brand):
+def insert_brand(cursor, brand):
 
     cursor.execute("""
                     INSERT INTO brand(name)
