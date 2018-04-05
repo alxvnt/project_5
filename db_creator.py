@@ -13,10 +13,43 @@ Author: Alix VOINOT
 """
 
 import pymysql
+import sys
 from constant import *
+import csv
 
-def csv_reader():
-    pass
+def csv_reader(file, conn):
+
+    cursor = conn.cursor()
+    csv.field_size_limit(sys.maxsize)
+    file =  open(file, newline='', encoding ="utf8") 
+    reader = csv.reader(file, delimiter = '	')
+    for row in reader:
+        brand = str(row[12])
+        category = str(row[16])
+        store = str(row[30])
+        cursor.execute("""
+                    INSERT INTO category(name)
+                    SELECT %s
+                    WHERE
+                    NOT EXISTS (
+                    	SELECT name FROM category WHERE name = %s
+                    	)""",  (category, category))
+        cursor.execute("""
+                    INSERT INTO brand(name)
+                    SELECT %s
+                    WHERE
+                    NOT EXISTS (
+                    	SELECT name FROM brand WHERE name = %s
+                    	)""",  (brand, brand))
+        cursor.execute("""
+                    INSERT INTO store(name)
+                    SELECT %s
+                    WHERE
+                    NOT EXISTS (
+                    	SELECT name FROM store WHERE name = %s
+                    	)""",  (store, store))
+        
+        
 
 
 # Create an acces to the database
@@ -24,7 +57,8 @@ def db_connect():
     
     conn = pymysql.connect(host="localhost",\
                                 user="root",\
-                                password="")
+                                password="",\
+                                charset="utf8")
     return conn
 
 
@@ -34,7 +68,7 @@ def create_db(cursor):
     cursor.execute(""" DROP DATABASE IF EXISTS purbeurre; """)
     cursor.execute(""" CREATE DATABASE purbeurre; """)
     cursor.execute(""" USE purbeurre; """)
-    
+
     cursor.execute("""SET NAMES utf8;""")
     cursor.execute("""SET CHARACTER SET utf8;""")
     cursor.execute("""SET character_set_connection=utf8;""")
@@ -52,8 +86,8 @@ def create_db(cursor):
 
     # Create the table category
     cursor.execute(""" CREATE TABLE category (
-                        id_category TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        name VARCHAR(40) NOT NULL,
+                        id_category MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                        name VARCHAR(1000) NOT NULL,
                         PRIMARY KEY(id_category)
                         )
                         ENGINE = InnoDB
@@ -72,7 +106,7 @@ def create_db(cursor):
     # Create the table brand
     cursor.execute(""" CREATE TABLE brand (
                         id_brand MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        name VARCHAR(40) NOT NULL,
+                        name VARCHAR(200) NOT NULL,
                         PRIMARY KEY(id_brand)
                         )
                         ENGINE = InnoDB
@@ -81,7 +115,7 @@ def create_db(cursor):
     # Create the table store
     cursor.execute(""" CREATE TABLE store (
                         id_store MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        name VARCHAR(40) NOT NULL,
+                        name VARCHAR(200) NOT NULL,
                         PRIMARY KEY(id_store)
                         )
                         ENGINE = InnoDB
@@ -91,11 +125,11 @@ def create_db(cursor):
     cursor.execute(""" CREATE TABLE product (
                         id_product BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                         name VARCHAR(40) NOT NULL,
-                        id_category TINYINT UNSIGNED NOT NULL,
+                        id_category MEDIUMINT UNSIGNED NOT NULL,
                         id_brand MEDIUMINT UNSIGNED NOT NULL,
                         id_store MEDIUMINT UNSIGNED NOT NULL,
                         id_nutriscore TINYINT UNSIGNED NOT NULL,
-                        url VARCHAR(100) NOT NULL,
+                        url VARCHAR(1000) NOT NULL,
                         PRIMARY KEY(id_product),
                         CONSTRAINT fk_category
                             FOREIGN KEY(id_category)
@@ -129,43 +163,12 @@ def create_db(cursor):
                         ENGINE = InnoDB
                         DEFAULT CHARSET = utf8; """)
 
-# Insert data in the table nutriscore                        
-def insert_nutriscore(cursor, nutri):
-    
-    cursor.execute("""
-                    INSERT INTO nutriscore(value)
-                    VALUES("{}");""" .format(nutri))
-
-# Insert data in the table brand
-def insert_brand(cursor, brand):
-
-    cursor.execute("""
-                    INSERT INTO brand(name)
-                    VALUES("{}");""" .format(brand))
-
-# Insert data in the table store
-def insert_store(cursor, store):
-
-    cursor.execute("""
-                    INSERT INTO store(name)
-                    VALUES("{}");""" .format(store))
-
-# Insert data in the table category
-def insert_category(cursor, categ):
-
-    cursor.execute("""
-                    INSERT INTO category(name)
-                    VALUES("{}");""" .format(categ))
                         
-
-    
-
 def main():
         conn = db_connect()
         cursor = conn.cursor()
         create_db(cursor)
-        for x in nutriscore:
-            insert_nutriscore(cursor, x)
+        csv_reader(file1, conn)
         conn.commit()
         conn.close()
     

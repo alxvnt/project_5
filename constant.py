@@ -9,3 +9,7 @@ Author: Alix VOINOT
 """
 
 nutriscore = ['A', 'B', 'C', 'D', 'E']
+
+file1 = 'fr.openfoodfacts.org.products.csv'.encode('utf8')
+
+
