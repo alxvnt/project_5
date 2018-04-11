@@ -49,16 +49,7 @@ def csv_reader(file, conn):
                     	SELECT name FROM store WHERE name = %s
                     	)""",  (store, store))
         
-def display_categories(cursor):
-    
-    cursor.execute("""SELECT name FROM category""")
-    row = cursor.fetchone()
-    x = 0
-    while row is not None:
-        x+=1
-        #oui = str(row[0])
-        print( str(x) + ") " + row[0])
-        row = cursor.fetchone()
+
 
 
 # Create an acces to the database
@@ -176,9 +167,7 @@ def create_db(cursor):
 def main():
         conn = db_connect()
         cursor = conn.cursor()
-        cursor.execute(""" Use purbeurre; """)
-        display_categories(cursor)
-        #create_db(cursor)
+        create_db(cursor)
         #csv_reader(file1, conn)
         conn.commit()
         conn.close()
