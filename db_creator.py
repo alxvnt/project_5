@@ -27,6 +27,7 @@ def csv_reader(file, conn):
         brand = str(row[12])
         category = str(row[16])
         store = str(row[30])
+        print(store + '  |   ' + category + '   |   ' + store)
         cursor.execute("""
                     INSERT INTO category(name)
                     SELECT %s
@@ -48,6 +49,7 @@ def csv_reader(file, conn):
                     NOT EXISTS (
                     	SELECT name FROM store WHERE name = %s
                     	)""",  (store, store))
+        conn.commit()
         
 
 
@@ -168,7 +170,7 @@ def main():
         conn = db_connect()
         cursor = conn.cursor()
         create_db(cursor)
-        #csv_reader(file1, conn)
+        csv_reader(file1, conn)
         conn.commit()
         conn.close()
     

@@ -11,7 +11,8 @@ Author: Alix VOINOT
 
 class Product():
 
-    def __init__(self, name, category, brand, store, nutriscore, url):
+    def __init__(self, id_prod, name, category, brand, store, nutriscore, url):
+        self.id_prod = id_prod
         self.name = name
         self.category = category
         self.brand = brand

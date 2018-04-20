@@ -12,6 +12,16 @@ Author: Alix VOINOT
 import pymysql
 from classes import *
 
+# Create an access to the database
+
+def db_connect():
+    conn = pymysql.connect(host="localhost",\
+                                    user="root",\
+                                    password="",\
+                                    database="purbeurre",\
+                                    charset="utf8")
+    return conn
+
 # Print the list of categories
 def display_categories(conn):
 
@@ -23,6 +33,8 @@ def display_categories(conn):
         x+=1
         print( str(x) + ")" + row[0])
         row = cursor.fetchone()
+
+        
 
 # Print the list of the product in the select category
 def list_product(conn, id_category):
@@ -36,34 +48,46 @@ def list_product(conn, id_category):
         print( str(x) + ")" + row[0])
         row = cursor.fetchone()
 
+
+
 # Print the chosen product and all the information about him
 def display_product(conn, id_product):
     
     cursor = conn.cursor()
-    cursor.execute(""" SELECT p.name, c.name, b.name, s.name, n.value, p.url FROM product p
+    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, n.value, p.url FROM product p
                         JOIN category c ON c.id_category = p.id_category
                         JOIN brand b ON b.id_brand = p.id_brand
                         JOIN store s ON s.id_store = p.id_store
                         JOIN nutriscore n ON n.id_nutriscore = p.id_nutriscore
                         WHERE id_product = %s""", (id_product))
     row = cursor.fetchone()
-    name = row[0]
-    categ = row[1]
-    brand = row[2]
-    store = row[3]
-    nutriscore = row[4]
-    url = row[5]
-    prod = Product(name, categ, brand, store, nutriscore, url)
+    id_prod = row[0]
+    name = row[1]
+    categ = row[2]
+    brand = row[3]
+    store = row[4]
+    nutriscore = row[5]
+    url = row[6]
+    prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
     prod.display()
     
 
+def save_sub(prod1, prod2, conn):
+
+    cursor = conn.cursor()
+    cursor.execute(""" INSERT INTO saved_substitute(id_product, id_substitute
+                    """, (prod1.id_prod, prod2.id_prod))
+
+def find_sub(conn):
+
+    cursor = conn.cursor()
+    cursor.execute("""SELECT p.name, s.id_product FROM product p
+                      JOIN saved_substitute s ON s.id_product = p.id_product
+                        """)
+
 def main():
     
-    conn = pymysql.connect(host="localhost",\
-                                user="root",\
-                                password="",\
-                                database="purbeurre",\
-                                charset="utf8")
+    conn = db_connect()
     
     
     loop = True
