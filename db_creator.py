@@ -170,7 +170,7 @@ def main():
         conn = db_connect()
         cursor = conn.cursor()
         create_db(cursor)
-        csv_reader(file1, conn)
+        #csv_reader(file1, conn)
         conn.commit()
         conn.close()
     
