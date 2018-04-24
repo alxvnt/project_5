@@ -21,12 +21,14 @@ class Product():
         self.url = url
 
     def display(self):
+        print()
         print("Nom : " + self.name)
         print("Catégorie : " + self.category)
         print("Marque : " + self.brand)
         print("Magasin : " + self.store)
         print("Nutriscore : ", self.nutriscore)
         print("Plus d'infos : " + self.url)
+        print()
         
 
 class SaveSub():

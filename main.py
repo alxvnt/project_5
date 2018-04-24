@@ -53,7 +53,7 @@ def list_product(conn, id_category):
 def list_sub(conn, nutriscore, categ):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT name FROM Product WHERE nutriscore_100g > {0} AND id_category = {1}""".format(nutriscore, categ))
+    cursor.execute(""" SELECT name FROM Product WHERE nutriscore < {0} AND id_category = {1}""".format(nutriscore, categ))
     row = cursor.fetchone()
     list1 = []
     while row is not None:
@@ -66,7 +66,7 @@ def list_sub(conn, nutriscore, categ):
 def get_product(conn, id_product):
     
     cursor = conn.cursor()
-    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore_100g, p.url FROM product p
+    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore, p.url FROM product p
                         JOIN category c ON c.id_category = p.id_category
                         JOIN brand b ON b.id_brand = p.id_brand
                         JOIN store s ON s.id_store = p.id_store
@@ -82,6 +82,24 @@ def get_product(conn, id_product):
     prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
     return prod
    
+def get_product_by_name(conn, prod_name):
+
+    cursor = conn.cursor()
+    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore, p.url FROM product p
+                        JOIN category c ON c.id_category = p.id_category
+                        JOIN brand b ON b.id_brand = p.id_brand
+                        JOIN store s ON s.id_store = p.id_store
+                        WHERE p.name = %s""", (prod_name))
+    row = cursor.fetchone()
+    id_prod = row[0]
+    name = row[1]
+    categ = row[2]
+    brand = row[3]
+    store = row[4]
+    nutriscore = row[5]
+    url = row[6]
+    prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
+    return prod
 
 def save_sub(prod1, prod2, conn):
 
@@ -91,6 +109,7 @@ def save_sub(prod1, prod2, conn):
     cursor.execute(""" INSERT INTO saved_substitute(id_product, id_substitute)
                         VALUES({0}, {1})
                     """ .format(id1, id2))
+    conn.commit()
 
 # Find in the DB all the previous product which have been substitute
 def find_sub(conn):
@@ -160,7 +179,8 @@ def main():
     
     while loop:
 
-        print()
+        print("----------------------------------")
+        print("MENU PRINCIPAL")
         ch1 = pick_choice(op1, op2)
         print(ch1)
         if ch1 == 1:
@@ -170,7 +190,7 @@ def main():
             list_categ = display_categories(conn)
             display_list(list_categ)
             print("Choisissez une catégorie")
-            choice_categ =  pick_line(list_categ)
+            choice_categ = pick_line(list_categ)
 
             # Display all the product in the choosen categorie and choose one
             list_prod = list_product(conn, choice_categ)
@@ -180,31 +200,30 @@ def main():
             
 
             # Display the product information
-            prod1 = get_product(conn, choice_product)
+            prod1 = get_product_by_name(conn, list_prod[choice_product-1])
             prod1.display()
 
-            print("Voici les aliments pouvant être un substitut plus diététique à votre choix :")
-            listSub = list_sub(conn, prod1.nutriscore, choice_categ)
-            if not listSub:
-                print("Nous n'avons pas trouvé d'alternative plus saine à cette aliment")
-            else:
-                display_list(listSub)
-                print("Choisissez un produit")
-                choice_sub = pick_line(listSub)
+            ch3 = pick_choice(op6, op3)
 
-                #get_product
-                ch2 = pick_choice(op5, op3)
-                if ch2 == 1:
-                    save_sub(prod1, prod2, conn)
-                    print(" Le substitut a bien été enregistré ")
+            if ch3 == 1:
+                print("Voici les aliments pouvant être un substitut plus diététique à votre choix :")
+                listSub = list_sub(conn, prod1.nutriscore, choice_categ)
+                if not listSub:
+                    print("Nous n'avons pas trouvé d'alternative plus saine à cette aliment")
+                else:
+                    display_list(listSub)
+                    print("Choisissez un produit")
+                    choice_sub = pick_line(listSub)
 
-
-
-
-                             
-            ch3 = pick_choice(op3, op4)
-            if ch3 == 2:
-                loop = False
+                    prod2 = get_product_by_name(conn, listSub[choice_sub-1])
+                    prod2.display()
+                    ch3 = pick_choice(op5, op3)
+                    if ch3 == 1:
+                        save_sub(prod1, prod2, conn)
+                        print(" Le substitut a bien été enregistré ")    
+                    ch4 = pick_choice(op3, op4)
+                    if ch4 == 2:
+                        loop = False
         else:
             listSub = find_sub(conn)
             if listSub:
@@ -224,8 +243,8 @@ def main():
             else:
                 print("Aucun substitut n'a été enregistré")
 
-            ch3 = pick_choice(op3, op4)
-            if ch3 == 2:
+            ch5 = pick_choice(op3, op4)
+            if ch5 == 2:
                 loop = False
                 
 
