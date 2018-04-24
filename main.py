@@ -50,10 +50,10 @@ def list_product(conn, id_category):
     return list1
 
 # Display the list of the potential sub
-def list_sub(conn, nutriscore):
+def list_sub(conn, nutriscore, categ):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT name FROM Product WHERE nutriscore_100g > {0}""".format(nutriscore))
+    cursor.execute(""" SELECT name FROM Product WHERE nutriscore_100g > {0} AND id_category = {1}""".format(nutriscore, categ))
     row = cursor.fetchone()
     list1 = []
     while row is not None:
@@ -120,8 +120,9 @@ def get_sub_data(conn, id_save_sub):
 
 def pick_choice(op1, op2):
 
-    print(op1)
-    print(op2)
+    print()
+    print("1)" + op1)
+    print("2)" + op2)
     choice = input("Votre choix : ")
     if choice not in ["1", "2"]:
         print("Veuillez entrer un chiffre disponible \n")
@@ -165,40 +166,63 @@ def main():
         if ch1 == 1:
             print("Vous avez choisi de remplacer un aliment")
 
-            # Display categ
+            # Display all the categorie and choose one
             list_categ = display_categories(conn)
             display_list(list_categ)
             print("Choisissez une catégorie")
             choice_categ =  pick_line(list_categ)
-            
+
+            # Display all the product in the choosen categorie and choose one
             list_prod = list_product(conn, choice_categ)
             display_list(list_prod)
+            print("Choisissez un produit")
+            choice_product = pick_line(list_prod)
+            
 
-            choice_product = int(input("Entrez le produit choisi : "))
+            # Display the product information
             prod1 = get_product(conn, choice_product)
             prod1.display()
 
             print("Voici les aliments pouvant être un substitut plus diététique à votre choix :")
-            listSub = list_sub(conn, prod1.nutriscore)
-            display_list(listSub)
+            listSub = list_sub(conn, prod1.nutriscore, choice_categ)
+            if not listSub:
+                print("Nous n'avons pas trouvé d'alternative plus saine à cette aliment")
+            else:
+                display_list(listSub)
+                print("Choisissez un produit")
+                choice_sub = pick_line(listSub)
 
-            choice_sub = int(input("Entrez le produit choisi : "))
+                #get_product
+                ch2 = pick_choice(op5, op3)
+                if ch2 == 1:
+                    save_sub(prod1, prod2, conn)
+                    print(" Le substitut a bien été enregistré ")
+
+
+
+
                              
-            
+            ch3 = pick_choice(op3, op4)
+            if ch3 == 2:
+                loop = False
         else:
             listSub = find_sub(conn)
-            display_list(listSub)
+            if listSub:
+                display_list(listSub)
             
-            id_sub = int(input("Choisissez le sub :"))
-            list2 = get_sub_data(conn, id_sub)
+                id_sub = int(input("Choisissez le sub :"))
+                list2 = get_sub_data(conn, id_sub)
             
-            p1 = get_product(conn, list2[0])
-            p2 = get_product(conn, list2[1])
+                p1 = get_product(conn, list2[0])
+                p2 = get_product(conn, list2[1])
 
-            p1.display()
-            print()
-            print("---------------------------------------")
-            p2.display()
+                p1.display()
+                print()
+                print("---------------------------------------")
+                p2.display()
+
+            else:
+                print("Aucun substitut n'a été enregistré")
 
             ch3 = pick_choice(op3, op4)
             if ch3 == 2:

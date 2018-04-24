@@ -14,8 +14,11 @@ file1 = 'fr.openfoodfacts.org.products.csv'.encode('utf8')
 
 
 
-op1 = "1) Remplacer un aliment"
-op2 = "2) Retrouver un substitue"
+op1 = " Remplacer un aliment"
+op2 = " Retrouver un substitue"
 
-op3 = "Retournez au menu"
-op4 = "Quitter"
+op3 = " Retournez au menu"
+op4 = " Quitter"
+
+op5 = " Sauvegarder le substitut "
+
