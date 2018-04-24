@@ -116,13 +116,14 @@ def find_sub(conn):
 
     print("Voici la liste des précédents substitut effectué: ")
     cursor = conn.cursor()
-    cursor.execute("""SELECT p.name, s.id_product FROM product p
+    cursor.execute("""SELECT s.id_product, p.name  FROM product p
                       JOIN saved_substitute s ON s.id_product = p.id_product
+                      ORDER BY s.id_saved_substitute
                         """)
     row = cursor.fetchone()
     list1 = []
     while row is not None:
-        list1.append(row[0])
+        list1.append(row[1])
         row = cursor.fetchone()
     return list1
 
@@ -136,6 +137,17 @@ def get_sub_data(conn, id_save_sub):
     list1.append(row[0])
     list1.append(row[1])
     return list1
+
+def get_prod_name(conn, id_prod):
+
+    cursor = conn.cursor()
+    cursor.execute(""" SELECT name FROM product
+                        WHERE id_product = {0}""" .format(id_prod))
+
+    row = cursor.fetchone()
+    name = row[0]
+    return name
+                   
 
 def pick_choice(op1, op2):
 
@@ -228,12 +240,15 @@ def main():
             listSub = find_sub(conn)
             if listSub:
                 display_list(listSub)
-            
-                id_sub = int(input("Choisissez le sub :"))
+
+                print("Choisissez le substitut voulu")
+                id_sub = pick_line(listSub)
                 list2 = get_sub_data(conn, id_sub)
             
-                p1 = get_product(conn, list2[0])
-                p2 = get_product(conn, list2[1])
+                name1 = get_prod_name(conn, list2[0])
+                name2 = get_prod_name(conn, list2[1])
+                p1 = get_product_by_name(conn, name1)
+                p2 = get_product_by_name(conn, name2)
 
                 p1.display()
                 print()

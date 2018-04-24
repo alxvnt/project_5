@@ -33,8 +33,8 @@ def csv_reader(file, conn):
             store = str(row[30])
             nutriscore = str(row[164])
             list1 = []
-            list1.append([name, category, brand, store, nutriscore, url])
-            if ((0 < len(brand) < 25) and (category) and (0 < len(store) < 25) and (0 < len(name) < 30) and (0 < len(url) < 100) and(nutriscore)):
+            list1.append([str(row[7]), categ_pars(row[16]), str(row[12]), str(row[30]), str(row[164]), str(row[1])])
+            if ( (0 < len(list1[0][0]) < 30) and (list1[0][1]) and (0 < len(list1[0][2]) < 25) and (0 < len(list1[0][3]) < 25) and (list1[0][4]) and (0 < len(list1[0][5]) < 100)):
                 print(list1)
                 cursor.execute("""
                     INSERT INTO category(name)
@@ -42,21 +42,21 @@ def csv_reader(file, conn):
                     WHERE
                     NOT EXISTS (
                     	SELECT name FROM category WHERE name = %s
-                    	)""",  (category, category))
+                    	)""",  (list1[0][1], list1[0][1]))
                 cursor.execute("""
                     INSERT INTO brand(name)
                     SELECT %s
                     WHERE
                     NOT EXISTS (
                     	SELECT name FROM brand WHERE name = %s
-                    	)""",  (brand, brand))
+                    	)""",  (list1[0][2], list1[0][2]))
                 cursor.execute("""
                     INSERT INTO store(name)
                     SELECT %s
                     WHERE
                     NOT EXISTS (
                     	SELECT name FROM store WHERE name = %s
-                    	)""",  (store, store))
+                    	)""",  (list1[0][3], list1[0][3]))
                 cursor.execute("""
                     INSERT INTO product
                     SET name = %s, id_category = (SELECT id_category FROM category WHERE name = %s), 
@@ -64,8 +64,10 @@ def csv_reader(file, conn):
                         id_store = (SELECT id_store FROM store WHERE name = %s),
                         nutriscore = %s,
                         url = %s
-                        """, (name, category, brand, store, nutriscore, url))
+                        """, (list1[0][0], list1[0][1], list1[0][2], list1[0][3], list1[0][4], list1[0][5]))
         except IndexError:
+            pass
+        except UnicodeEncodeError:
             pass
         
 
