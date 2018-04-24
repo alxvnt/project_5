@@ -25,6 +25,16 @@ class Product():
         print("Catégorie : " + self.category)
         print("Marque : " + self.brand)
         print("Magasin : " + self.store)
-        print("Nutriscore : " + self.nutriscore)
+        print("Nutriscore : ", self.nutriscore)
         print("Plus d'infos : " + self.url)
+        
+
+class SaveSub():
+
+    def __init__(self, id_SaveSub, id_product, id_substitute):
+        self.id_SaveSub = id_SaveSub
+        self.id_product = id_product
+        self.id_substitute = id_substitute
+
+
         

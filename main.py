@@ -29,11 +29,11 @@ def display_categories(conn):
     cursor = conn.cursor()
     cursor.execute("""SELECT name FROM category""")
     row = cursor.fetchone()
-    x = 0
+    list1 = []
     while row is not None:
-        x+=1
-        print( str(x) + ")" + row[0])
+        list1.append(row[0])
         row = cursor.fetchone()
+    return list1
 
         
 
@@ -49,11 +49,13 @@ def list_product(conn, id_category):
         row = cursor.fetchone()
     return list1
 
+# Display the list of the potential sub
 def list_sub(conn, nutriscore):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT name FROM Product WHERE nutriscore > {0}""".format(nutriscore))
+    cursor.execute(""" SELECT name FROM Product WHERE nutriscore_100g > {0}""".format(nutriscore))
     row = cursor.fetchone()
+    list1 = []
     while row is not None:
         list1.append(row[0])
         row = cursor.fetchone()
@@ -61,14 +63,13 @@ def list_sub(conn, nutriscore):
     
 
 # Print the chosen product and all the information about him
-def display_product(conn, id_product):
+def get_product(conn, id_product):
     
     cursor = conn.cursor()
-    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, n.value, p.url FROM product p
+    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore_100g, p.url FROM product p
                         JOIN category c ON c.id_category = p.id_category
                         JOIN brand b ON b.id_brand = p.id_brand
                         JOIN store s ON s.id_store = p.id_store
-                        JOIN nutriscore n ON n.id_nutriscore = p.id_nutriscore
                         WHERE id_product = %s""", (id_product))
     row = cursor.fetchone()
     id_prod = row[0]
@@ -79,7 +80,7 @@ def display_product(conn, id_product):
     nutriscore = row[5]
     url = row[6]
     prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
-    prod.display()
+    return prod
    
 
 def save_sub(prod1, prod2, conn):
@@ -91,6 +92,7 @@ def save_sub(prod1, prod2, conn):
                         VALUES({0}, {1})
                     """ .format(id1, id2))
 
+# Find in the DB all the previous product which have been substitute
 def find_sub(conn):
 
     print("Voici la liste des précédents substitut effectué: ")
@@ -105,6 +107,17 @@ def find_sub(conn):
         row = cursor.fetchone()
     return list1
 
+def get_sub_data(conn, id_save_sub):
+
+    cursor = conn.cursor()
+    cursor.execute("""SELECT id_product, id_substitute FROM saved_substitute
+                        WHERE id_saved_substitute = {0} """ .format(id_save_sub))
+    list1 = []
+    row = cursor.fetchone()
+    list1.append(row[0])
+    list1.append(row[1])
+    return list1
+
 def pick_choice(op1, op2):
 
     print(op1)
@@ -113,6 +126,28 @@ def pick_choice(op1, op2):
     if choice not in ["1", "2"]:
         print("Veuillez entrer un chiffre disponible \n")
         choice = pick_choice(op1, op2)
+    return int(choice)
+
+def display_list(list1):
+    y = 1
+    for x in list1:
+        print(y, x)
+        y+=1
+    print()
+
+
+def pick_line(list1):
+    
+    choice = input("Choix :")
+    try:
+        int(choice)
+        if not (1 <= int(choice) <= len(list1)):
+            print("Veuillez entrer un nombre disponible")
+            choice = pick_line(list1)
+    except ValueError:
+        print("Veuillez entrer un nombre")
+        choice = pick_line(list1)
+        
     return int(choice)
 
 def main():
@@ -129,23 +164,41 @@ def main():
         print(ch1)
         if ch1 == 1:
             print("Vous avez choisi de remplacer un aliment")
+
+            # Display categ
+            list_categ = display_categories(conn)
+            display_list(list_categ)
+            print("Choisissez une catégorie")
+            choice_categ =  pick_line(list_categ)
             
-            display_categories(conn)
-            choice_categ =  int(input("Entrez la catégorie choisi : "))
-            list_product(conn, choice_categ)
+            list_prod = list_product(conn, choice_categ)
+            display_list(list_prod)
+
             choice_product = int(input("Entrez le produit choisi : "))
-            display_product(conn, choice_product)
-            # Entrez votre categories :
-            #choice_categ = l'id du produit
-            # display_product(cursor, choice_categ)
-            # Entrez votre produit
+            prod1 = get_product(conn, choice_product)
+            prod1.display()
+
+            print("Voici les aliments pouvant être un substitut plus diététique à votre choix :")
+            listSub = list_sub(conn, prod1.nutriscore)
+            display_list(listSub)
+
+            choice_sub = int(input("Entrez le produit choisi : "))
+                             
             
         else:
             listSub = find_sub(conn)
-            for sub in listSub:
-                print(sub)
+            display_list(listSub)
             
             id_sub = int(input("Choisissez le sub :"))
+            list2 = get_sub_data(conn, id_sub)
+            
+            p1 = get_product(conn, list2[0])
+            p2 = get_product(conn, list2[1])
+
+            p1.display()
+            print()
+            print("---------------------------------------")
+            p2.display()
 
             ch3 = pick_choice(op3, op4)
             if ch3 == 2:

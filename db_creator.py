@@ -79,7 +79,6 @@ def create_db(cursor):
     cursor.execute(""" DROP TABLE IF EXISTS saved_substitute; """) 
     cursor.execute(""" DROP TABLE IF EXISTS product; """)
     cursor.execute(""" DROP TABLE IF EXISTS category; """)
-    cursor.execute(""" DROP TABLE IF EXISTS nutriscore; """)
     cursor.execute(""" DROP TABLE IF EXISTS brand; """)
     cursor.execute(""" DROP TABLE IF EXISTS store; """)
     
@@ -91,15 +90,6 @@ def create_db(cursor):
                         id_category MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
                         name VARCHAR(1000) NOT NULL,
                         PRIMARY KEY(id_category)
-                        )
-                        ENGINE = InnoDB
-                        DEFAULT CHARSET = utf8; """)
-
-    # Create the table nutriscore
-    cursor.execute(""" CREATE TABLE nutriscore (
-                        id_nutriscore TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        value VARCHAR(1) NOT NULL,
-                        PRIMARY KEY(id_nutriscore)
                         )
                         ENGINE = InnoDB
                         DEFAULT CHARSET = utf8; """)
@@ -130,7 +120,7 @@ def create_db(cursor):
                         id_category MEDIUMINT UNSIGNED NOT NULL,
                         id_brand MEDIUMINT UNSIGNED NOT NULL,
                         id_store MEDIUMINT UNSIGNED NOT NULL,
-                        id_nutriscore TINYINT UNSIGNED NOT NULL,
+                        nutriscore_100g FLOAT UNSIGNED NOT NULL,
                         url VARCHAR(1000) NOT NULL,
                         PRIMARY KEY(id_product),
                         CONSTRAINT fk_category
@@ -139,9 +129,6 @@ def create_db(cursor):
                         CONSTRAINT fk_brand
                             FOREIGN KEY(id_brand)
                             REFERENCES brand(id_brand),
-                        CONSTRAINT fk_nutriscore
-                            FOREIGN KEY(id_nutriscore)
-                            REFERENCES nutriscore(id_nutriscore),
                         CONSTRAINT fk_store
                             FOREIGN KEY(id_store)
                             REFERENCES store(id_store)
