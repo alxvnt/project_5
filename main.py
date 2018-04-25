@@ -13,15 +13,18 @@ import pymysql
 from classes import *
 from constant import *
 
-# Create an access to the database
 
+# Create and return an access to the database
 def db_connect():
-    conn = pymysql.connect(host="localhost",\
-                                    user="root",\
-                                    password="",\
-                                    database="purbeurre",\
-                                    charset="utf8")
+
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="purbeurre",
+        charset="utf8")
     return conn
+
 
 # Print the list of categories
 def display_categories(conn):
@@ -35,57 +38,41 @@ def display_categories(conn):
         row = cursor.fetchone()
     return list1
 
-        
 
 # Print the list of the product in the select category
 def list_product(conn, id_category):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT name FROM product WHERE id_category = %s """,(id_category))
+    cursor.execute(""" SELECT name FROM product
+    WHERE id_category = %s """, (id_category))
     row = cursor.fetchone()
     list1 = []
     while row is not None:
         list1.append(row[0])
         row = cursor.fetchone()
     return list1
+
 
 # Display the list of the potential sub
 def list_sub(conn, nutriscore, categ):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT name FROM Product WHERE nutriscore < {0} AND id_category = {1}""".format(nutriscore, categ))
+    cursor.execute(""" SELECT name FROM Product WHERE nutriscore
+                    < {0} AND id_category = {1}""".format(nutriscore, categ))
     row = cursor.fetchone()
     list1 = []
     while row is not None:
         list1.append(row[0])
         row = cursor.fetchone()
     return list1
-    
+
 
 # Print the chosen product and all the information about him
-def get_product(conn, id_product):
-    
-    cursor = conn.cursor()
-    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore, p.url FROM product p
-                        JOIN category c ON c.id_category = p.id_category
-                        JOIN brand b ON b.id_brand = p.id_brand
-                        JOIN store s ON s.id_store = p.id_store
-                        WHERE id_product = %s""", (id_product))
-    row = cursor.fetchone()
-    id_prod = row[0]
-    name = row[1]
-    categ = row[2]
-    brand = row[3]
-    store = row[4]
-    nutriscore = row[5]
-    url = row[6]
-    prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
-    return prod
-   
 def get_product_by_name(conn, prod_name):
 
     cursor = conn.cursor()
-    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name, s.name, p.nutriscore, p.url FROM product p
+    cursor.execute(""" SELECT p.id_product, p.name, c.name, b.name,
+                        s.name, p.nutriscore, p.url FROM product p
                         JOIN category c ON c.id_category = p.id_category
                         JOIN brand b ON b.id_brand = p.id_brand
                         JOIN store s ON s.id_store = p.id_store
@@ -101,6 +88,8 @@ def get_product_by_name(conn, prod_name):
     prod = Product(id_prod, name, categ, brand, store, nutriscore, url)
     return prod
 
+
+# Save the 2 id in the table saved_substitute
 def save_sub(prod1, prod2, conn):
 
     cursor = conn.cursor()
@@ -111,7 +100,8 @@ def save_sub(prod1, prod2, conn):
                     """ .format(id1, id2))
     conn.commit()
 
-# Find in the DB all the previous product which have been substitute
+
+# Return a list which contain the name of the substituted product
 def find_sub(conn):
 
     print("Voici la liste des précédents substitut effectué: ")
@@ -127,28 +117,33 @@ def find_sub(conn):
         row = cursor.fetchone()
     return list1
 
+
+# Return a list which contain id of the product and his sub
 def get_sub_data(conn, id_save_sub):
 
     cursor = conn.cursor()
     cursor.execute("""SELECT id_product, id_substitute FROM saved_substitute
-                        WHERE id_saved_substitute = {0} """ .format(id_save_sub))
+                        WHERE id_saved_substitute = {0}
+                        """ .format(id_save_sub))
     list1 = []
     row = cursor.fetchone()
     list1.append(row[0])
     list1.append(row[1])
     return list1
 
+
+# Return the name of the product from his id
 def get_prod_name(conn, id_prod):
 
     cursor = conn.cursor()
     cursor.execute(""" SELECT name FROM product
                         WHERE id_product = {0}""" .format(id_prod))
-
     row = cursor.fetchone()
     name = row[0]
     return name
-                   
 
+
+# Display 2 choice and return the choice of the user
 def pick_choice(op1, op2):
 
     print()
@@ -160,16 +155,19 @@ def pick_choice(op1, op2):
         choice = pick_choice(op1, op2)
     return int(choice)
 
+
+# Display a list
 def display_list(list1):
     y = 1
     for x in list1:
         print(y, x)
-        y+=1
+        y += 1
     print()
 
 
+# Display a list of choice and return the choice of the user
 def pick_line(list1):
-    
+
     choice = input("Choix :")
     try:
         int(choice)
@@ -179,16 +177,16 @@ def pick_line(list1):
     except ValueError:
         print("Veuillez entrer un nombre")
         choice = pick_line(list1)
-        
+
     return int(choice)
 
+
 def main():
-    
+
     conn = db_connect()
-    
-    
+
     loop = True
-    
+
     while loop:
 
         print("----------------------------------")
@@ -209,7 +207,6 @@ def main():
             display_list(list_prod)
             print("Choisissez un produit")
             choice_product = pick_line(list_prod)
-            
 
             # Display the product information
             prod1 = get_product_by_name(conn, list_prod[choice_product-1])
@@ -218,38 +215,46 @@ def main():
             ch3 = pick_choice(op6, op3)
 
             if ch3 == 1:
-                print("Voici les aliments pouvant être un substitut plus diététique à votre choix :")
+                print("Aliments pouvant être un substitut plus sain :")
                 listSub = list_sub(conn, prod1.nutriscore, choice_categ)
                 if not listSub:
-                    print("Nous n'avons pas trouvé d'alternative plus saine à cette aliment")
+                    print("Aucun substitut trouvé")
                 else:
+                    # Display the list of the potential sub
                     display_list(listSub)
                     print("Choisissez un produit")
                     choice_sub = pick_line(listSub)
 
+                    # Display the substitute's information
                     prod2 = get_product_by_name(conn, listSub[choice_sub-1])
                     prod2.display()
+
+                    # Ask for save the sub
                     ch3 = pick_choice(op5, op3)
                     if ch3 == 1:
                         save_sub(prod1, prod2, conn)
-                        print(" Le substitut a bien été enregistré ")    
+                        print(" Le substitut a bien été enregistré ")
                     ch4 = pick_choice(op3, op4)
                     if ch4 == 2:
                         loop = False
         else:
             listSub = find_sub(conn)
             if listSub:
+
+                # Display the list of the save sub
                 display_list(listSub)
 
                 print("Choisissez le substitut voulu")
                 id_sub = pick_line(listSub)
                 list2 = get_sub_data(conn, id_sub)
-            
+
+                # Get the data of the 2 product
                 name1 = get_prod_name(conn, list2[0])
                 name2 = get_prod_name(conn, list2[1])
                 p1 = get_product_by_name(conn, name1)
                 p2 = get_product_by_name(conn, name2)
 
+                # Display the data of the 2 product
                 p1.display()
                 print()
                 print("---------------------------------------")
@@ -261,13 +266,9 @@ def main():
             ch5 = pick_choice(op3, op4)
             if ch5 == 2:
                 loop = False
-                
-
 
     conn.commit()
     conn.close()
-    
-                 
 
 if __name__ == "__main__":
     main()

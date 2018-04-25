@@ -26,11 +26,10 @@ pb_categories = ["Aliments d'origine végétale",
                  ]
 
 op1 = " Remplacer un aliment"
-op2 = " Retrouver un substitue"
+op2 = " Retrouver un substitut"
 
 op3 = " Retournez au menu"
 op4 = " Quitter"
 
 op5 = " Sauvegarder le substitut "
 op6 = " Voir les possibles substituts "
-
