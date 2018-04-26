@@ -26,7 +26,7 @@ def db_connect():
     return conn
 
 
-# Print the list of categories
+# Return a list of categories
 def display_categories(conn):
 
     cursor = conn.cursor()
@@ -39,7 +39,7 @@ def display_categories(conn):
     return list1
 
 
-# Print the list of the product in the select category
+# Return a list of the product in the selected category
 def list_product(conn, id_category):
 
     cursor = conn.cursor()
@@ -53,7 +53,7 @@ def list_product(conn, id_category):
     return list1
 
 
-# Display the list of the potential sub
+# Return the list of the potential sub
 def list_sub(conn, nutriscore, categ):
 
     cursor = conn.cursor()
@@ -67,7 +67,7 @@ def list_sub(conn, nutriscore, categ):
     return list1
 
 
-# Print the chosen product and all the information about him
+# Return an object Product find with his name
 def get_product_by_name(conn, prod_name):
 
     cursor = conn.cursor()
