@@ -165,7 +165,7 @@ def display_list(list1):
     print()
 
 
-# Display a list of choice and return the choice of the user
+# Return the choice of the user
 def pick_line(list1):
 
     choice = input("Choix :")
@@ -175,7 +175,7 @@ def pick_line(list1):
             print("Veuillez entrer un nombre disponible")
             choice = pick_line(list1)
     except ValueError:
-        print("Veuillez entrer un nombre")
+        print("Veuillez entrer un nombre disponible")
         choice = pick_line(list1)
 
     return int(choice)
